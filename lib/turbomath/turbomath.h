@@ -2,7 +2,7 @@
  *
  * BSD 3-Clause License
  *
- * Copyright (c) 2017, James Jackson  BYU MAGICC Lab, Provo UT
+ * Copyright (c) 2017, James Jackson and Daniel Koch, BYU MAGICC Lab, Provo UT
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,46 @@ public:
 
 inline Vector operator* (float s, const Vector& v) { return v * s; }
 inline Vector operator/ (float s, const Vector& v) { return v / s; }
+
+
+class Matrix
+{
+public:
+  Matrix();
+  Matrix(const Matrix& m);
+  Matrix& operator= (const Matrix& m);
+
+  static Matrix zeros();
+  static Matrix identity();
+
+  const float& operator() (unsigned row, unsigned col) const;
+  float& operator() (unsigned row, unsigned col);
+
+  float det() const;
+  float trace() const;
+  Matrix transpose() const;
+
+  Matrix operator* (float s) const;
+  Matrix operator/ (float s) const;
+  Matrix& operator*= (float s);
+  Matrix& operator/= (float s);
+
+  Matrix operator+ (const Matrix& m) const;
+  Matrix operator- (const Matrix& m) const;
+  Matrix& operator+= (const Matrix& m);
+  Matrix& operator-= (const Matrix& m);
+
+  Vector operator* (const Vector& v) const;
+  Matrix operator* (const Matrix& m) const;
+
+private:
+  float data_[9];
+};
+
+inline Matrix operator* (float s, const Matrix& m) { return m * s; }
+inline Matrix operator/ (float s, const Matrix& m) { return m / s; }
+
+//! @todo Vector (transpose) * Matrix operator?
 
 
 class Quaternion

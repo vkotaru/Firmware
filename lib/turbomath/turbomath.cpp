@@ -2,7 +2,7 @@
  *
  * BSD 3-Clause License
  *
- * Copyright (c) 2017, James Jackson - BYU MAGICC Lab, Provo UT
+ * Copyright (c) 2017, James Jackson and Daniel Koch, BYU MAGICC Lab, Provo UT
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
  */
 
 #include <turbomath/turbomath.h>
+#include <cstring>
 
 namespace turbomath
 {
@@ -144,6 +145,187 @@ Vector Vector::cross(const Vector& v) const
   return Vector( y * v.z - z * v.y,
                  z * v.x - x * v.z,
                  x * v.y - y * v.x);
+}
+
+Matrix::Matrix()
+{}
+
+Matrix::Matrix(const Matrix& m)
+{
+  memcpy(data_, m.data_, sizeof(data_));
+}
+
+Matrix& Matrix::operator= (const Matrix& m)
+{
+  memcpy(data_, m.data_, sizeof(data_));
+  return *this;
+}
+
+Matrix Matrix::zeros()
+{
+  Matrix m;
+  for (unsigned i = 0; i < 9; i++)
+  {
+    m.data_[i] = 0.0f;
+  }
+  return m;
+}
+
+Matrix Matrix::identity()
+{
+  Matrix m;
+  m.data_[0] = 1.0f;
+  m.data_[1] = 0.0f;
+  m.data_[2] = 0.0f;
+  m.data_[3] = 0.0f;
+  m.data_[4] = 1.0f;
+  m.data_[5] = 0.0f;
+  m.data_[6] = 0.0f;
+  m.data_[7] = 0.0f;
+  m.data_[8] = 1.0f;
+  return m;
+}
+
+const float& Matrix::operator() (unsigned row, unsigned col) const
+{
+  return data_[3*row + col];
+}
+
+float& Matrix::operator() (unsigned row, unsigned col)
+{
+  return data_[3*row + col];
+}
+
+float Matrix::det() const
+{
+  return   data_[0]*data_[4]*data_[8]
+         + data_[1]*data_[5]*data_[6]
+         + data_[2]*data_[3]*data_[7]
+         - data_[0]*data_[5]*data_[7]
+         - data_[1]*data_[3]*data_[8]
+         - data_[2]*data_[4]*data_[6];
+}
+
+float Matrix::trace() const
+{
+  return data_[0] + data_[4] + data_[8];
+}
+
+Matrix Matrix::transpose() const
+{
+  Matrix m;
+  m.data_[0] = data_[0];
+  m.data_[1] = data_[3];
+  m.data_[2] = data_[6];
+  m.data_[3] = data_[1];
+  m.data_[4] = data_[4];
+  m.data_[5] = data_[7];
+  m.data_[6] = data_[2];
+  m.data_[7] = data_[5];
+  m.data_[8] = data_[8];
+  return m;
+}
+
+Matrix Matrix::operator* (float s) const
+{
+  Matrix m(*this);
+  for (unsigned i = 0; i < 9; i++)
+  {
+    m.data_[i] *= s;
+  }
+  return m;
+}
+
+Matrix Matrix::operator/ (float s) const
+{
+  Matrix m(*this);
+  for (unsigned i = 0; i < 9; i++)
+  {
+    m.data_[i] /= s;
+  }
+  return m;
+}
+
+Matrix& Matrix::operator*= (float s)
+{
+  for (unsigned i = 0; i < 9; i++)
+  {
+    data_[i] *= s;
+  }
+  return *this;
+}
+
+Matrix& Matrix::operator/= (float s)
+{
+  for (unsigned i = 0; i < 9; i++)
+  {
+    data_[i] /= s;
+  }
+  return *this;
+}
+
+Matrix Matrix::operator+ (const Matrix& m) const
+{
+  Matrix result;
+  for (unsigned i = 0; i < 9; i++)
+  {
+    result.data_[i] = data_[i] + m.data_[i];
+  }
+  return result;
+}
+
+Matrix Matrix::operator- (const Matrix& m) const
+{
+  Matrix result;
+  for (unsigned i = 0; i < 9; i++)
+  {
+    result.data_[i] = data_[i] - m.data_[i];
+  }
+  return result;
+}
+
+Matrix& Matrix::operator+= (const Matrix& m)
+{
+  for (unsigned i = 0; i < 9; i++)
+  {
+    data_[i] += m.data_[i];
+  }
+  return *this;
+}
+
+Matrix& Matrix::operator-= (const Matrix& m)
+{
+  for (unsigned i = 0; i < 9; i++)
+  {
+    data_[i] -= m.data_[i];
+  }
+  return *this;
+}
+
+Vector Matrix::operator* (const Vector& v) const
+{
+  return Vector(data_[0]*v.x + data_[1]*v.y + data_[2]*v.z,
+                data_[3]*v.x + data_[4]*v.y + data_[5]*v.z,
+                data_[6]*v.x + data_[7]*v.y + data_[8]*v.z);
+}
+
+Matrix Matrix::operator* (const Matrix& m) const
+{
+  Matrix result;
+
+  result.data_[0] = data_[0]*m.data_[0] + data_[1]*m.data_[3] + data_[2]*m.data_[6];
+  result.data_[1] = data_[0]*m.data_[1] + data_[1]*m.data_[4] + data_[2]*m.data_[7];
+  result.data_[2] = data_[0]*m.data_[2] + data_[1]*m.data_[5] + data_[2]*m.data_[8];
+
+  result.data_[3] = data_[3]*m.data_[0] + data_[4]*m.data_[3] + data_[5]*m.data_[6];
+  result.data_[4] = data_[3]*m.data_[1] + data_[4]*m.data_[4] + data_[5]*m.data_[7];
+  result.data_[5] = data_[3]*m.data_[2] + data_[4]*m.data_[5] + data_[5]*m.data_[8];
+
+  result.data_[6] = data_[6]*m.data_[0] + data_[7]*m.data_[3] + data_[8]*m.data_[6];
+  result.data_[7] = data_[6]*m.data_[1] + data_[7]*m.data_[4] + data_[8]*m.data_[7];
+  result.data_[8] = data_[6]*m.data_[2] + data_[7]*m.data_[5] + data_[8]*m.data_[8];
+
+  return result;
 }
 
 Quaternion::Quaternion() : w(1.0f), x(0.0f), y(0.0f), z(0.0f)
