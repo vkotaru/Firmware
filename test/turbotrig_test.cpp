@@ -33,7 +33,7 @@
 
 #include "math.h"
 #include "common.h"
-#include <stdio.h>
+#include <cstdio>
 
 turbomath::Vector random_vectors[25] =
 {

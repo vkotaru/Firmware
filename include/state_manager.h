@@ -32,7 +32,7 @@
 #ifndef ROSFLIGHT_FIRMWARE_STATE_MANAGER_H
 #define ROSFLIGHT_FIRMWARE_STATE_MANAGER_H
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace rosflight_firmware
 {

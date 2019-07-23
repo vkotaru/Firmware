@@ -30,7 +30,7 @@
  */
 
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "mixer.h"
 #include "rosflight.h"

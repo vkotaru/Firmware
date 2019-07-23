@@ -32,9 +32,9 @@
 #ifndef ROSFLIGHT_FIRMWARE_BOARD_H
 #define ROSFLIGHT_FIRMWARE_BOARD_H
 
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdbool>
+#include <cstdint>
 
 #include "sensors.h"
 #include "state_manager.h"
