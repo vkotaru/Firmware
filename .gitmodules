@@ -7,3 +7,6 @@
 [submodule "boards/airbourne/airbourne"]
 	path = boards/airbourne/airbourne
 	url = https://github.com/rosflight/airbourne_f4.git
+[submodule "boards/navio/Navio2"]
+	path = boards/navio/Navio2
+	url = git@github.com:emlid/Navio2.git
