@@ -49,6 +49,7 @@ PARALLEL_JOBS	:= $(shell grep -c ^processor /proc/cpuinfo)
 # List of valid boards (update with new boards)
 VALID_F1_BOARDS = NAZE
 VALID_F4_BOARDS = REVO
+VALID_NAVIO_BOARDS = NAVIO
 
 # Make sure that the supplied board is supported, and if so,
 # set the proper board directory
@@ -60,6 +61,10 @@ ifeq ($(BOARD),$(filter $(BOARD),$(VALID_F1_BOARDS)))
 BOARD_DIR=boards/breezy
 endif
 
+ifeq ($(BOARD),$(filter $(BOARD),$(VALID_NAVIO_BOARDS)))
+BOARD_DIR=boards/navio
+endif
+
 ifeq ($(BOARD_DIR),)
 $(info Invalid BOARD: $(BOARD))
 $(info =================================)
@@ -68,6 +73,9 @@ $(info $(VALID_F1_BOARDS))
 $(info =================================)
 $(info VALID F4 BOARDS:)
 $(info $(VALID_F4_BOARDS))
+$(info =================================)
+$(info VALID NAVIO BOARDS:)
+$(info $(VALID_NAVIO_BOARDS))
 $(info =================================)
 else
 $(info Building ROSflight $(BOARD_DIR))
@@ -81,6 +89,7 @@ all:
 clean:
 	cd boards/airbourne && make clean
 	cd boards/breezy && make clean
+	cd boards/navio && make clean
 
 flash:
 	cd $(BOARD_DIR) && make -j$(PARALLEL_JOBS) -l$(PARALLEL_JOBS) DEBUG=$(DEBUG) SERIAL_DEVICE=$(SERIAL_DEVICE) flash
