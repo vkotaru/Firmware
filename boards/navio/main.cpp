@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, James Jackson and Daniel Koch, BYU MAGICC Lab
+ * Copyright (c) 2020, TBD
  *
  * All rights reserved.
  *
@@ -36,7 +36,7 @@
 
 int main()
 {
-  printf("hello from the other wise");
+  printf("hello from the other side\n");
   // rosflight_firmware::NavioBoard board;
   // board.init_board();
   // rosflight_firmware::Mavlink mavlink(board);

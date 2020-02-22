@@ -151,7 +151,7 @@ $(BIN_DIR)/$(TARGET)/%.o: %.s
 .PHONY: all flash clean
 
 clean:
-		rm -rf $(OBJECTS) $(OBJECT_DIR)
+	rm -rf $(OBJECTS) $(BIN_DIR)
 
 flash: $(TARGET_HEX)
 		stm32flash -w $(TARGET_HEX) -v -g 0x0 -b 921600 $(SERIAL_DEVICE)
