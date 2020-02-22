@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// #include "navio_board.h"
+#include "navio_board.h"
 // #include "rosflight.h"
 // #include "mavlink.h"
 #include <stdio.h>
