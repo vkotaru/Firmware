@@ -34,6 +34,23 @@
 #include "mavlink.h"
 #include <stdio.h>
 
+//#pragma GCC diagnostic ignored "-Wmissing-field-initializers" //Because this was unnecessary and annoying
+
+uint32_t error_count_ = 0;//Used for counting resets
+rosflight_firmware::ROSflight *rosflight=nullptr;//Used to access important variables in case of a hard fault
+rosflight_firmware::StateManager::State get_state()//Used in case of a hard fault
+{
+  if (rosflight==nullptr)
+  {
+#pragma GCC diagnostic push //Ignore blank fields in struct
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+    rosflight_firmware::StateManager::State ret = {0};
+#pragma GCC diagnostic pop
+    return ret;
+  }
+  return rosflight->state_manager_.state();
+}
+
 int main()
 {
   printf("hello from the other side\n");
@@ -44,9 +61,9 @@ int main()
 
   firmware.init();
 
-  while (true)
-  {
-    firmware.run();
-  }
+//  while (true)
+//  {
+//    firmware.run();
+//  }
   return 0;
 }

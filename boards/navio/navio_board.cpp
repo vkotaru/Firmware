@@ -477,7 +477,7 @@ void NavioBoard::led1_toggle()
 bool NavioBoard::has_backup_data()
 {
 //   BackupData backup_data = backup_sram_read();
-  return true; //(check_backup_checksum(backup_data) && backup_data.error_code!=0);
+  return false; //(check_backup_checksum(backup_data) && backup_data.error_code!=0);
 }
 
 rosflight_firmware::BackupData NavioBoard::get_backup_data()

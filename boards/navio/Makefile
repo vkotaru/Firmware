@@ -33,7 +33,6 @@ INCLUDE_DIRS += $(BOARD_DIR) \
 				$(BOARD_SRC_DIR)/Navio2 \
 				$(BOARD_SRC_DIR)/Navio+ \
 				$(BIN_DIR)
-				
 
 BOARD_CXX_SRC = navio_board.cpp \
 				main.cpp
@@ -50,8 +49,8 @@ CXXSOURCES += $(BOARD_CXX_SRC) \
 #################################
 
 CC=gcc
-CXX=g++ 
-CXXFLAGS=-std=c++11 -Wno-psabi -lpigpio \
+CXX=g++
+CXXFLAGS=-std=c++11 -Wno-psabi -lpigpio -lpthread \
 			$(addprefix -I ,$(INCLUDE_DIRS)) $(DEFS) #$(DEBUG_FLAGS) \
 			$(CXX_FILE_SIZE_FLAGS) # $(CXX_STRICT_FLAGS)
 # DEPS = $(notdir $(wildcard $(BOARD_SRC_DIR)/*/*.cpp))
@@ -59,15 +58,15 @@ OBJECTS += $(addsuffix .o,$(addprefix $(BIN_DIR)/$(TARGET)/,$(basename $(CXXSOUR
 
 
 TARGET_EXE=$(BIN_DIR)/$(TARGET)_$(BOARD)_$(BUILD_TYPE)
-	
+
 
 $(TARGET_EXE): $(OBJECTS)
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-$(BIN_DIR)/$(TARGET)/%.o: %.cpp 
+$(BIN_DIR)/$(TARGET)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@echo %% $(notdir $<)
-	$(CXX) -c -o $@ $< $(CXXFLAGS) 
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 
 #################################

@@ -58,36 +58,36 @@ void ROSflight::init()
   state_manager_.init();
 
   // Read EEPROM to get initial params
-  params_.init();
+//  params_.init();
 
   // Initialize Mixer
-  mixer_.init();
+//  mixer_.init();
 
   /***********************/
   /***  Hardware Setup ***/
   /***********************/
 
   // Initialize PWM and RC
-  rc_.init();
+//  rc_.init();
 
   // Initialize MAVlink Communication
-  comm_manager_.init();
+//  comm_manager_.init();
 
   // Initialize Sensors
-  sensors_.init();
+//  sensors_.init();
 
   /***********************/
   /***  Software Setup ***/
   /***********************/
 
   // Initialize Estimator
-  estimator_.init();
+//  estimator_.init();
 
   // Initialize Controller
-  controller_.init();
+//  controller_.init();
 
   // Initialize the command muxer
-  command_manager_.init();
+//  command_manager_.init();
 }
 
 

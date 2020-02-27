@@ -50,7 +50,7 @@ void StateManager::init()
   process_errors();
 
   // Initialize LEDs
-  RF_.board_.led1_off();
+  RF_.board_.led1_off(); while(1);
   if (RF_.board_.has_backup_data())
   {
     rosflight_firmware::BackupData error_data=RF_.board_.get_backup_data();
