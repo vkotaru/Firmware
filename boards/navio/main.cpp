@@ -32,7 +32,6 @@
 #include "navio_board.h"
 #include "rosflight.h"
 #include "mavlink.h"
-#include <stdio.h>
 
 //#pragma GCC diagnostic ignored "-Wmissing-field-initializers" //Because this was unnecessary and annoying
 
@@ -59,7 +58,8 @@ int main()
   rosflight_firmware::Mavlink mavlink(board);
   rosflight_firmware::ROSflight firmware(board, mavlink);
 
-  firmware.init();
+  board.led_check();
+//   firmware.init();
 
 //  while (true)
 //  {

@@ -7,6 +7,7 @@
 #include <chrono>
 #include <ctime>
 #include <map>
+#include <stdio.h>
 
 // Navio common
 #include "ADC.h"
@@ -123,7 +124,7 @@ private:
 public:
   NavioBoard();
 
-//   setup
+  // setup
   void init_board() override;
   void board_reset(bool bootloader) override;
 
@@ -193,6 +194,8 @@ public:
   void led1_on() override;
   void led1_off() override;
   void led1_toggle() override;
+
+  void led_check();
 
   //Backup Data
   bool has_backup_data() override;

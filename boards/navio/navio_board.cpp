@@ -465,6 +465,35 @@ void NavioBoard::led1_off()
   led1_ = false;
 }
 
+void NavioBoard::led_check()
+{
+  led_.setColor(Colors::Green);
+  printf("LED is green\n");
+  sleep(3);
+
+  led_.setColor(Colors::Cyan);
+  printf("LED is cyan\n");
+  sleep(3);
+
+  led_.setColor(Colors::Blue);
+  printf("LED is blue\n");
+  sleep(3);
+
+  led_.setColor(Colors::Magenta);
+  printf("LED is magenta\n");
+  sleep(3);
+ 
+  led_.setColor(Colors::Red);
+  printf("LED is red\n");
+  sleep(3);
+
+  led_.setColor(Colors::Yellow);
+  printf("LED is yellow\n");
+  sleep(3);
+
+  printf("LED check complete\n");
+}
+
 void NavioBoard::led1_toggle()
 {
     if (led1_)
