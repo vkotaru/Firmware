@@ -30,23 +30,23 @@
  */
 
 #include "navio_board.h"
-// #include "rosflight.h"
-// #include "mavlink.h"
+#include "rosflight.h"
+#include "mavlink.h"
 #include <stdio.h>
 
 int main()
 {
   printf("hello from the other side\n");
-  // rosflight_firmware::NavioBoard board;
-  // board.init_board();
-  // rosflight_firmware::Mavlink mavlink(board);
-  // rosflight_firmware::ROSflight firmware(board, mavlink);
+  rosflight_firmware::NavioBoard board;
+  board.init_board();
+  rosflight_firmware::Mavlink mavlink(board);
+  rosflight_firmware::ROSflight firmware(board, mavlink);
 
-  // firmware.init();
+  firmware.init();
 
-  // while (true)
-  // {
-  //   firmware.run();
-  // }
+  while (true)
+  {
+    firmware.run();
+  }
   return 0;
 }

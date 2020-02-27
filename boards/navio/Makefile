@@ -51,7 +51,9 @@ CXXSOURCES += $(BOARD_CXX_SRC) \
 
 CC=gcc
 CXX=g++ 
-CXXFLAGS=-std=c++11 -Wno-psabi -lpigpio $(addprefix -I ,$(INCLUDE_DIRS)) 
+CXXFLAGS=-std=c++11 -Wno-psabi -lpigpio \
+			$(addprefix -I ,$(INCLUDE_DIRS)) $(DEFS) #$(DEBUG_FLAGS) \
+			$(CXX_FILE_SIZE_FLAGS) # $(CXX_STRICT_FLAGS)
 # DEPS = $(notdir $(wildcard $(BOARD_SRC_DIR)/*/*.cpp))
 OBJECTS += $(addsuffix .o,$(addprefix $(BIN_DIR)/$(TARGET)/,$(basename $(CXXSOURCES))))
 
