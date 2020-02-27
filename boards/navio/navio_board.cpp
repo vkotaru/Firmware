@@ -20,6 +20,8 @@ void NavioBoard::init_board()
   {
     printf("Not root. Please launch with sudo \n");
   }
+  led_.initialize();
+  NavioBoard::led_check();
   // ignoring barometer for now 
   // int_i2c_.init(&i2c_config[BARO_I2C]);
   // ext_i2c_.init(&i2c_config[EXTERNAL_I2C]);
@@ -122,7 +124,6 @@ void NavioBoard::serial_flush()
 void NavioBoard::sensors_init()
 {
   while (clock_millis() < 50) {} // wait for sensors to boot up
-  led_.initialize();
   imu_.initialize();
   baro_.initialize();
 
@@ -469,28 +470,22 @@ void NavioBoard::led_check()
 {
   led_.setColor(Colors::Green);
   printf("LED is green\n");
-  sleep(3);
-
+  usleep(200000);
   led_.setColor(Colors::Cyan);
   printf("LED is cyan\n");
-  sleep(3);
-
+  usleep(200000);
   led_.setColor(Colors::Blue);
   printf("LED is blue\n");
-  sleep(3);
-
+  usleep(200000);
   led_.setColor(Colors::Magenta);
   printf("LED is magenta\n");
-  sleep(3);
- 
+  usleep(200000);
   led_.setColor(Colors::Red);
   printf("LED is red\n");
-  sleep(3);
-
+  usleep(200000);
   led_.setColor(Colors::Yellow);
   printf("LED is yellow\n");
-  sleep(3);
-
+  usleep(200000);
   printf("LED check complete\n");
 }
 

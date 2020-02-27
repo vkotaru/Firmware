@@ -54,16 +54,15 @@ int main()
 {
   printf("hello from the other side\n");
   rosflight_firmware::NavioBoard board;
-  board.init_board();
   rosflight_firmware::Mavlink mavlink(board);
   rosflight_firmware::ROSflight firmware(board, mavlink);
+  rosflight = &firmware;
+  board.init_board();
+  firmware.init();
 
-  board.led_check();
-//   firmware.init();
-
-//  while (true)
-//  {
-//    firmware.run();
-//  }
+  while (true)
+  {
+    firmware.run();
+  }
   return 0;
 }
