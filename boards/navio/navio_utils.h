@@ -1,5 +1,15 @@
-#ifndef ROSFLIGHT_FIRMWARE_NAVIO_PWM_H
-#define ROSFLIGHT_FIRMWARE_NAVIO_PWM_H
+#ifndef ROSFLIGHT_FIRMWARE_NAVIO_UTILS_H
+#define ROSFLIGHT_FIRMWARE_NAVIO_UTILS_H
+
+#include <cmath>
+#include <stdio.h>
+#include <memory>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <sys/time.h>
 
 namespace rosflight_firmware
 {
@@ -82,6 +92,39 @@ public:
   }
 };
 
+class Socket
+{
+
+public:
+    Socket(char * ip,char * port)
+    {
+        sockfd = socket(AF_INET,SOCK_DGRAM,0);
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_addr.s_addr = inet_addr(ip);
+        servaddr.sin_port = htons(atoi(port));
+    }
+
+    Socket()
+    {
+        sockfd = socket(AF_INET,SOCK_DGRAM,0);
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+        servaddr.sin_port = htons(7000);
+    }
+
+    void output(float W, float X, float Y, float Z, int Hz)
+    {
+        sprintf(sendline,"%10f %10f %10f %10f %dHz\n", W, X, Y, Z, Hz);
+        sendto(sockfd, sendline, strlen(sendline), 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+    }
+
+private:
+    int sockfd;
+    struct sockaddr_in servaddr = {0};
+    char sendline[80];
+
+};
+
 } // namespace rosflight_firmware
 
-#endif // ROSFLIGHT_FIRMWARE_NAVIO_PWM_H
+#endif // ROSFLIGHT_FIRMWARE_NAVIO_UTILS_H

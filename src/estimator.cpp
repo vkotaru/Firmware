@@ -229,6 +229,9 @@ void Estimator::run()
   // Save off adjust gyro measurements with estimated biases for control
   state_.angular_velocity = gyro_LPF_ - bias_;
 
+  printf(" angles: \t\t: %f, %f, %f\n", state_.roll, state_.pitch, state_.yaw);
+  printf("ang vels: \t\t: %f, %f, %f\n", state_.angular_velocity.x, state_.angular_velocity.y, state_.angular_velocity.z);
+
   // If it has been more than 0.5 seconds since the accel update ran and we
   // are supposed to be getting them then trigger an unhealthy estimator error.
   if (RF_.params_.get_param_int(PARAM_FILTER_USE_ACC) && now_us > 500000 + last_acc_update_us_

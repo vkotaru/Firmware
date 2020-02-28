@@ -5,7 +5,7 @@ BOARD ?= NAVIO
 
 DEBUG ?= GDB
 
-SERIAL_DEVICE ?= /dev/ttyUSB0
+SERIAL_DEVICE ?= /dev/tnt0
 
 BOARD_LIB ?= libnavio.a
 

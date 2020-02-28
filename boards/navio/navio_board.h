@@ -32,7 +32,7 @@
 #include "RGBled.h"
 
 #include "board.h"
-#include "navio_pwm.h"
+#include "navio_utils.h"
 
 namespace rosflight_firmware
 {
