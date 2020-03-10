@@ -160,6 +160,7 @@ bool NavioBoard::imu_read(float accel[3], float *temperature, float gyro[3], uin
   gyro[1] = -gy; // read_gyro[0];
   gyro[2] = -gz; // read_gyro[2];
 
+  *time_us = clock_micros();
   return true;
 }
 

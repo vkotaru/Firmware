@@ -97,6 +97,7 @@ void ROSflight::run()
   /*********************/
   /***  Control Loop ***/
   /*********************/
+  // printf("control loop....");
   uint64_t start = board_.clock_micros();
   if (sensors_.run())
   {
@@ -106,24 +107,36 @@ void ROSflight::run()
     mixer_.mix_output();
     loop_time_us = board_.clock_micros() - start;
   }
+  // printf("done\n");
 
   /*********************/
   /***  Post-Process ***/
   /*********************/
+  // printf("comm stream...");
   // internal timers figure out what and when to send
-  comm_manager_.stream();
+  // comm_manager_.stream();
+  // printf("done\n");
 
   // receive mavlink messages
-  comm_manager_.receive();
+  // printf("comm receive...");
+  //comm_manager_.receive();
+  // printf("done\n");
 
   // update the state machine, an internal timer runs this at a fixed rate
+  //printf(" state manager...");
   state_manager_.run();
+  // printf("done\n");
+
 
   // get RC, an internal timer runs this every 20 ms (50 Hz)
+  // printf("rc ...");
   rc_.run();
+  // printf("done\n");
 
   // update commands (internal logic tells whether or not we should do anything or not)
+  // printf("command manager\n");
   command_manager_.run();
+  // printf("done\n");
 }
 
 uint32_t ROSflight::get_loop_time_us()
