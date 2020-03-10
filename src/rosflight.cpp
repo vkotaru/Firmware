@@ -71,10 +71,11 @@ void ROSflight::init()
   rc_.init();
 
   // Initialize MAVlink Communication
-  comm_manager_.init();
+  // comm_manager_.init();
 
   // Initialize Sensors
   sensors_.init();
+  sensors_.start_imu_calibration();
 
   /***********************/
   /***  Software Setup ***/
@@ -87,13 +88,13 @@ void ROSflight::init()
   controller_.init();
 
   // Initialize the command muxer
-  command_manager_.init();
+  // command_manager_.init();
 
   /***************************/
   /***  Hardfault Recovery ***/
   /***************************/
 
-  state_manager_.check_backup_memory();
+  // state_manager_.check_backup_memory();
 }
 
 
@@ -141,7 +142,7 @@ void ROSflight::run()
 
   // update commands (internal logic tells whether or not we should do anything or not)
   // printf("command manager\n");
-  command_manager_.run();
+  // command_manager_.run();
   // printf("done\n");
 }
 

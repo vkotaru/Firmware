@@ -172,7 +172,7 @@ void NavioBoard::imu_not_responding_error()
 bool NavioBoard::mag_present()
 {
 //   mag_.update();
-  return true; //mag_.present();
+  return false; //mag_.present();
 }
 
 void NavioBoard::mag_update()
