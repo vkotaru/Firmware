@@ -60,6 +60,7 @@ int main()
   board.init_board();
   firmware.init();
 
+  printf("initialization complete\n");
   while (true)
   {
     firmware.run();
