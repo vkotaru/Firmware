@@ -388,14 +388,11 @@ void CommManager::heartbeat_callback(void)
   // to the off-board computer.
   connected_ = true;
 
-  static bool one_time_data_sent = false;
-  if (!one_time_data_sent)
+  // send backup data if we have it buffered
+  if (have_backup_data_)
   {
-    // error data
-    if (this->RF_.board_.has_backup_data())
-    {
-        this->send_error_data();
-    }
+    comm_link_.send_error_data(sysid_, backup_data_buffer_);
+    have_backup_data_ = false;
   }
 
   /// JSJ: I don't think we need this
@@ -489,14 +486,14 @@ void CommManager::send_output_raw(void)
 void CommManager::send_rc_raw(void)
 {
   // TODO better mechanism for retreiving RC (through RC module, not PWM-specific)
-  uint16_t channels[8] = { static_cast<uint16_t>(RF_.board_.rc_read(0)*1000),
-                           static_cast<uint16_t>(RF_.board_.rc_read(1)*1000),
-                           static_cast<uint16_t>(RF_.board_.rc_read(2)*1000),
-                           static_cast<uint16_t>(RF_.board_.rc_read(3)*1000),
-                           static_cast<uint16_t>(RF_.board_.rc_read(4)*1000),
-                           static_cast<uint16_t>(RF_.board_.rc_read(5)*1000),
-                           static_cast<uint16_t>(RF_.board_.rc_read(6)*1000),
-                           static_cast<uint16_t>(RF_.board_.rc_read(7)*1000) };
+  uint16_t channels[8] = { static_cast<uint16_t>(RF_.board_.rc_read(0)*1000 + 1000),
+                           static_cast<uint16_t>(RF_.board_.rc_read(1)*1000 + 1000),
+                           static_cast<uint16_t>(RF_.board_.rc_read(2)*1000 + 1000),
+                           static_cast<uint16_t>(RF_.board_.rc_read(3)*1000 + 1000),
+                           static_cast<uint16_t>(RF_.board_.rc_read(4)*1000 + 1000),
+                           static_cast<uint16_t>(RF_.board_.rc_read(5)*1000 + 1000),
+                           static_cast<uint16_t>(RF_.board_.rc_read(6)*1000 + 1000),
+                           static_cast<uint16_t>(RF_.board_.rc_read(7)*1000 + 1000) };
   comm_link_.send_rc_raw(sysid_, RF_.board_.clock_millis(), channels);
 }
 
@@ -540,10 +537,18 @@ void CommManager::send_mag(void)
     comm_link_.send_mag(sysid_, RF_.sensors_.data().mag);
 }
 
-void CommManager::send_error_data(void)
+void CommManager::send_backup_data(const StateManager::BackupData& backup_data)
 {
-  BackupData error_data = RF_.board_.get_backup_data();
-  comm_link_.send_error_data(sysid_, error_data);
+  if (connected_)
+  {
+    comm_link_.send_error_data(sysid_, backup_data);
+  }
+  else
+  {
+    backup_data_buffer_ = backup_data;
+    have_backup_data_ = true;
+  }
+
 }
 
 void CommManager::send_gnss(void)
