@@ -39,8 +39,8 @@ Some things to keep in mind as you design or build your MAV.
 
 ROSflight is best supported on the Openpilot Revolution from [hobbyking.com](https://hobbyking.com/en_us/openpilot-cc3d-revolution-revo-32bit-flight-controller-w-integrated-433mhz-oplink.html?___store=en_us). It works on most variants of the Revo and Naze32 flight controller. Configuring a new board is relatively straight-forward, assuming that the board uses an STM32F4xx or STM32F1xx processor.
 
-!!! Warning
-    Deprecation Notice: As of June 2019, plans are to deprecate support for the F1 in the near future. If you need to use an F1, you will need to retrieve an older version of the code that supports the F1. However, if there are issues, we will not be able to help you fix them.
+!!! warning "Deprecation Notice"
+    As of June 2019, plans are to deprecate support for the F1 in the near future. If you need to use an F1, you will need to retrieve an older version of the code that supports the F1. However, if there are issues, we will not be able to help you fix them.
 
 !!! warning
     We have seen some problems using off-brand versions of flight controllers because the accelerometers are of very poor quality, which can mess with the firmware; try to avoid those if you can.
@@ -52,6 +52,7 @@ Additional Sensors you may want for your ROSflight setup include:
 * Sonar - MB1242 I2CXL-MaxSonar - [$40 on MaxBotix](https://www.maxbotix.com/Ultrasonic_Sensors/MB1242.htm)
 * GPS – u-blox NEO-M8N – [$35 from Drotek](https://drotek.com/shop/en/u-blox/883-ublox-neo-m8-gps-module.html)
 * Digital Airspeed Sensor – [$65 on JDrones](http://store.jdrones.com/digital_airspeed_sensor_p/senair02kit.html)
+* Battery Monitor - [$10 from RCTimer](http://rctimer.com/?product-1096.html) or [DIY](https://opwiki.readthedocs.io/en/latest/user_manual/revo/voltage_current.html#basic-voltage-sensor)
 
 ### Vibration Isolation
 
@@ -98,6 +99,15 @@ You will need a laptop which can run Ubuntu 16.04 or 18.04 with ROS to communica
 
 A joystick is used for [software-in-the-loop (SIL) simulations](gazebo_simulation.md). The joystick is not technically a required component because it is possible to control your MAV from the command line, but it makes things much easier. Our first recommendation is to use the same Taranis QX7 transmitter you use for hardware as a joystick by plugging it into the computer via USB. We also support RealFlight controllers and XBOX 360 controllers. Other joysticks are supported, but you may need to create custom axis and button mappings.
 
+### Battery Monitor
+
+A battery monitor is an optional analog sensor that provides battery voltage and/or battery current information. This data can be used to prevent power loss in air or to measure system load. The sensor outputs an analog voltage proportional to the battery voltage and/or current through the battery. A battery monitor can be as simple as a voltage divider, which measures only voltage. Small PCB sensors are also available that measure both voltage and current. Ensure that the monitor output does not exceed 3.3V, as this may damage the flight controller. The battery monitor connects to the "PWR/SONAR" port on the Revo. Battery monitors are not supported on the Naze32/Flip32.
+
+For ROSflight to use a battery monitor, an appropriate multiplier must be set. ROSflight multiplies the analog signal from the monitor by the multiplier to get the final reading. The monitor datasheet should contain the information needed to get the multiplier. For example, the datasheet for the AttoPilot 50V/90A sensor states that it outputs 63.69 mV / V. To get the original battery voltage, the multiplier must be 1/.06369, or 15.7. The multipliers for the voltage and current are set separately, with the `BATT_VOLT_MULT` and `BATT_CURR_MULT` parameters, respectively.
+
+ROSflight applies a simple low-pass filter to remove noise from the voltage and current measurements. These filters are configurable via the `BATT_VOLT_ALPHA` and `BATT_CURR_ALPHA` [parameters](parameter-configuration.md). The alpha value for a given cutoff frequency \\(a\\), can be calulated with: \\( \alpha =  e ^ {-.01a} \\). As battery voltages do not typically change quickly, the default of 0.995 usually suffices.
+
+More information on battery monitor hardware, including determinining appropriate multipliers and creating a simple DIY monitor, can be found on the [OpenPilot Wiki](https://opwiki.readthedocs.io/en/latest/user_manual/revo/voltage_current.html).
 ## Wiring Diagram
 
 Below is an example wiring diagram for a multirotor using an MSI Cubi as a companion computer. This diagram also includes the motor power switch, which allows for the sensors, flight controller, and companion computer to be powered on while the motors are off. This is a safer way to test sensors, code, etc. as the motors are unable to spin while the switch is off.

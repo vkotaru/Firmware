@@ -30,13 +30,12 @@
  */
 
 #include "state_manager.h"
+
 #include "rosflight.h"
 
 namespace rosflight_firmware
 {
-
-StateManager::StateManager(ROSflight &parent) :
-  RF_(parent), fsm_state_(FSM_STATE_INIT)
+StateManager::StateManager(ROSflight &parent) : RF_(parent), fsm_state_(FSM_STATE_INIT)
 {
   state_.armed = false;
   state_.error = false;
@@ -46,19 +45,13 @@ StateManager::StateManager(ROSflight &parent) :
 
 void StateManager::init()
 {
+  RF_.board_.backup_memory_init();
+
   set_event(EVENT_INITIALIZED);
   process_errors();
 
   // Initialize LEDs
   RF_.board_.led1_off();
-  if (RF_.board_.has_backup_data())
-  {
-    rosflight_firmware::BackupData error_data=RF_.board_.get_backup_data();
-    this->state_=error_data.state;
-    //Be very sure that arming is correct
-    if (error_data.arm_status!=rosflight_firmware::ARM_MAGIC)
-      this->state_.armed=false;
-  }
 }
 
 void StateManager::run()
@@ -144,7 +137,8 @@ void StateManager::set_event(StateManager::Event event)
         }
         else
         {
-          RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_ERROR, "RC throttle override must be active to arm");
+          RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_ERROR,
+                                "RC throttle override must be active to arm");
         }
       }
       else
@@ -161,7 +155,8 @@ void StateManager::set_event(StateManager::Event event)
     switch (event)
     {
     case EVENT_RC_LOST:
-      set_error(ERROR_RC_LOST); // sometimes redundant, but reports RC lost error if another error got reported first
+      set_error(ERROR_RC_LOST); // sometimes redundant, but reports RC lost error if another error
+                                // got reported first
       break;
     case EVENT_RC_FOUND:
       clear_error(ERROR_RC_LOST);
@@ -186,6 +181,8 @@ void StateManager::set_event(StateManager::Event event)
           RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_ERROR, "Unable to arm: Time going backwards");
         if (state_.error_codes & StateManager::ERROR_UNCALIBRATED_IMU)
           RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_ERROR, "Unable to arm: IMU not calibrated");
+        if (state_.error_codes & StateManager::ERROR_INVALID_FAILSAFE)
+          RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_ERROR, "Unable to arm: Invalid failsafe setting");
 
         next_arming_error_msg_ms_ = RF_.board_.clock_millis() + 1000; // throttle messages to 1 Hz
       }
@@ -275,6 +272,55 @@ void StateManager::set_event(StateManager::Event event)
     RF_.comm_manager_.update_status();
 }
 
+void StateManager::write_backup_data(const BackupData::DebugInfo &debug)
+{
+  BackupData data;
+  data.reset_count = hardfault_count_ + 1;
+  data.error_code = state_.error_codes;
+  data.arm_flag = state_.armed ? BackupData::ARM_MAGIC : 0;
+  data.debug = debug;
+
+  data.finalize();
+  RF_.board_.backup_memory_write(reinterpret_cast<const void *>(&data), sizeof(data));
+}
+
+void StateManager::check_backup_memory()
+{
+  // reinitialize to make sure backup memory is in a good state
+  RF_.board_.backup_memory_init();
+
+  // check for hardfault recovery data in backup memory
+  BackupData data;
+  if (RF_.board_.backup_memory_read(reinterpret_cast<void *>(&data), sizeof(data)))
+  {
+    if (data.valid_checksum())
+    {
+      hardfault_count_ = data.reset_count;
+
+      if (data.arm_flag == BackupData::ARM_MAGIC)
+      {
+        // do emergency rearm if in a good state
+        if (fsm_state_ == FSM_STATE_PREFLIGHT)
+        {
+          state_.armed = true;
+          fsm_state_ = FSM_STATE_ARMED;
+          RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_CRITICAL, "Rearming after hardfault!!!");
+        }
+        else
+        {
+          RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_CRITICAL, "Failed to rearm after hardfault!!!");
+        }
+      }
+
+      // queue sending backup data over comm link
+      RF_.comm_manager_.send_backup_data(data);
+      RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_CRITICAL, "Recovered from hardfault!!!");
+    }
+
+    RF_.board_.backup_memory_clear(sizeof(data));
+  }
+}
+
 void StateManager::process_errors()
 {
   if (state_.error_codes)
@@ -291,7 +337,7 @@ void StateManager::update_leds()
     if (next_led_blink_ms_ < RF_.board_.clock_millis())
     {
       RF_.board_.led1_toggle();
-      next_led_blink_ms_ =  RF_.board_.clock_millis() + 100;
+      next_led_blink_ms_ = RF_.board_.clock_millis() + 100;
     }
   }
   // blink slowly if in error
@@ -300,7 +346,7 @@ void StateManager::update_leds()
     if (next_led_blink_ms_ < RF_.board_.clock_millis())
     {
       RF_.board_.led1_toggle();
-      next_led_blink_ms_ =  RF_.board_.clock_millis() + 500;
+      next_led_blink_ms_ = RF_.board_.clock_millis() + 500;
     }
   }
   // off if disarmed, on if armed
@@ -310,4 +356,4 @@ void StateManager::update_leds()
     RF_.board_.led1_on();
 }
 
-} //namespace rosflight_firmware
+} // namespace rosflight_firmware

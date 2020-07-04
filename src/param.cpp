@@ -29,15 +29,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdint>
-#include <cstring>
+#include "param.h"
 
 #include "board.h"
 #include "mixer.h"
 
-#include "param.h"
-
 #include "rosflight.h"
+
+#include <cstdint>
+#include <cstring>
 
 #ifndef GIT_VERSION_HASH
 #define GIT_VERSION_HASH 0x00
@@ -56,19 +56,13 @@
 
 namespace rosflight_firmware
 {
-
-Params::Params(ROSflight& _rf) :
-  RF_(_rf),
-  listeners_(nullptr),
-  num_listeners_(0)
-{
-}
+Params::Params(ROSflight &_rf) : RF_(_rf), listeners_(nullptr), num_listeners_(0) {}
 
 // local function definitions
 void Params::init_param_int(uint16_t id, const char name[PARAMS_NAME_LENGTH], int32_t value)
 {
   // copy cstr including '\0' or until maxlen
-  const uint8_t len = (strlen(name)>=PARAMS_NAME_LENGTH) ? PARAMS_NAME_LENGTH : strlen(name)+1;
+  const uint8_t len = (strlen(name) >= PARAMS_NAME_LENGTH) ? PARAMS_NAME_LENGTH : strlen(name) + 1;
   memcpy(params.names[id], name, len);
   params.values[id].ivalue = value;
   params.types[id] = PARAM_TYPE_INT32;
@@ -77,7 +71,7 @@ void Params::init_param_int(uint16_t id, const char name[PARAMS_NAME_LENGTH], in
 void Params::init_param_float(uint16_t id, const char name[PARAMS_NAME_LENGTH], float value)
 {
   // copy cstr including '\0' or until maxlen
-  const uint8_t len = (strlen(name)>=PARAMS_NAME_LENGTH) ? PARAMS_NAME_LENGTH : strlen(name)+1;
+  const uint8_t len = (strlen(name) >= PARAMS_NAME_LENGTH) ? PARAMS_NAME_LENGTH : strlen(name) + 1;
   memcpy(params.names[id], name, len);
   params.values[id].fvalue = value;
   params.types[id] = PARAM_TYPE_FLOAT;
@@ -88,16 +82,18 @@ uint8_t Params::compute_checksum(void)
   uint8_t chk = 0;
   const char *p;
 
-  for (p = reinterpret_cast<const char *>(&params.values); p < reinterpret_cast<const char *>(&params.values) + 4*PARAMS_COUNT; p++)
+  for (p = reinterpret_cast<const char *>(&params.values);
+       p < reinterpret_cast<const char *>(&params.values) + 4 * PARAMS_COUNT; p++)
     chk ^= *p;
-  for (p = reinterpret_cast<const char *>(&params.names);  p < reinterpret_cast<const char *>(&params.names) + PARAMS_COUNT*PARAMS_NAME_LENGTH; p++)
+  for (p = reinterpret_cast<const char *>(&params.names);
+       p < reinterpret_cast<const char *>(&params.names) + PARAMS_COUNT * PARAMS_NAME_LENGTH; p++)
     chk ^= *p;
-  for (p = reinterpret_cast<const char *>(&params.types);  p < reinterpret_cast<const char *>(&params.types) + PARAMS_COUNT; p++)
+  for (p = reinterpret_cast<const char *>(&params.types);
+       p < reinterpret_cast<const char *>(&params.types) + PARAMS_COUNT; p++)
     chk ^= *p;
 
   return chk;
 }
-
 
 // function definitions
 void Params::init()
@@ -105,12 +101,14 @@ void Params::init()
   RF_.board_.memory_init();
   if (!read())
   {
-    RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_WARNING, "Unable to load parameters; using default values");
+    RF_.comm_manager_.log(CommLinkInterface::LogSeverity::LOG_WARNING,
+                          "Unable to load parameters; using default values");
     set_defaults();
     write();
   }
 }
 
+// clang-format off
 void Params::set_defaults(void)
 {
   /******************************/
@@ -133,7 +131,8 @@ void Params::set_defaults(void)
   init_param_int(PARAM_STREAM_AIRSPEED_RATE, "STRM_AIRSPEED", 50); // Rate of airspeed stream (Hz) | 0 |  50
   init_param_int(PARAM_STREAM_SONAR_RATE, "STRM_SONAR", 40); // Rate of sonar stream (Hz) | 0 | 40
   init_param_int(PARAM_STREAM_GNSS_RATE, "STRM_GNSS", 1000); // Maximum rate of GNSS stream (Hz) | 0 | 10
-  init_param_int(PARAM_STREAM_GNSS_RAW_RATE, "STRM_GNSS_RAW", 10); //Rate of GNSS raw stream (Hz) | 0 | 10
+  init_param_int(PARAM_STREAM_GNSS_FULL_RATE, "STRM_GNSS_FULL", 10); //Rate of GNSS full stream (Hz) | 0 | 10
+  init_param_int(PARAM_STREAM_BATTERY_STATUS_RATE, "STRM_BATTERY", 10); //Rate of battery status stream (Hz) | 0 | 10
 
   init_param_int(PARAM_STREAM_OUTPUT_RAW_RATE, "STRM_SERVO", 50); // Rate of raw output stream | 0 |  490
   init_param_int(PARAM_STREAM_RC_RAW_RATE, "STRM_RC", 50); // Rate of raw RC input stream | 0 | 50
@@ -175,7 +174,7 @@ void Params::set_defaults(void)
   /*************************/
   init_param_int(PARAM_MOTOR_PWM_SEND_RATE, "MOTOR_PWM_UPDATE", 0); // Overrides default PWM rate specified by mixer if non-zero - Requires reboot to take effect | 0 | 490
   init_param_float(PARAM_MOTOR_IDLE_THROTTLE, "MOTOR_IDLE_THR", 0.1); // min throttle command sent to motors when armed (Set above 0.1 to spin when armed) | 0.0 | 1.0
-  init_param_float(PARAM_FAILSAFE_THROTTLE, "FAILSAFE_THR", 0.3); // Throttle sent to motors in failsafe condition (set just below hover throttle) | 0.0 | 1.0
+  init_param_float(PARAM_FAILSAFE_THROTTLE, "FAILSAFE_THR", -1.0); // Throttle sent to motors in failsafe condition (set just below hover throttle) | 0.0 | 1.0
   init_param_int(PARAM_SPIN_MOTORS_WHEN_ARMED, "ARM_SPIN_MOTORS", true); // Enforce MOTOR_IDLE_THR | 0 | 1
 
   /*******************************/
@@ -275,13 +274,22 @@ void Params::set_defaults(void)
   /********************/
   init_param_float(PARAM_ARM_THRESHOLD, "ARM_THRESHOLD", 0.15); // RC deviation from max/min in yaw and throttle for arming and disarming check (us) | 0 | 500
 
+  /*****************************/
+  /*** BATTERY MONITOR SETUP ***/
+  /*****************************/
+  init_param_float(PARAM_BATTERY_VOLTAGE_MULTIPLIER, "BATT_VOLT_MULT", 0.0f);
+  init_param_float(PARAM_BATTERY_CURRENT_MULTIPLIER, "BATT_CURR_MULT", 0.0f);
+  init_param_float(PARAM_BATTERY_VOLTAGE_ALPHA, "BATT_VOLT_ALPHA", 0.995f);
+  init_param_float(PARAM_BATTERY_CURRENT_ALPHA, "BATT_CURR_ALPHA", 0.995f);
+
   /************************/
   /*** OFFBOARD CONTROL ***/
   /************************/
   init_param_int(PARAM_OFFBOARD_TIMEOUT, "OFFBOARD_TIMEOUT", 100); // Timeout in milliseconds for offboard commands, after which RC override is activated | 0 | 100000
 }
+// clang-format on
 
-void Params::set_listeners(ParamListenerInterface * const listeners[], size_t num_listeners)
+void Params::set_listeners(ParamListenerInterface *const listeners[], size_t num_listeners)
 {
   listeners_ = listeners;
   num_listeners_ = num_listeners;
@@ -391,4 +399,4 @@ bool Params::set_param_by_name_float(const char name[PARAMS_NAME_LENGTH], float 
   tmp.fvalue = value;
   return set_param_by_name_int(name, tmp.ivalue);
 }
-}
+} // namespace rosflight_firmware

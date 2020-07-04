@@ -37,10 +37,8 @@
 
 namespace rosflight_firmware
 {
-
 class testBoard : public Board
 {
-
 private:
   uint16_t rc_values[8] = {1500, 1500, 1000, 1500, 1500, 1500, 1500, 1500};
   uint64_t time_us_ = 0;
@@ -48,27 +46,29 @@ private:
   float acc_[3] = {0, 0, 0};
   float gyro_[3] = {0, 0, 0};
   bool new_imu_ = false;
+  static constexpr size_t BACKUP_MEMORY_SIZE{1024};
+  uint8_t backup_memory_[BACKUP_MEMORY_SIZE];
 
 public:
-// setup
+  // setup
   void init_board() override;
   void board_reset(bool bootloader) override;
 
-// clock
+  // clock
   uint32_t clock_millis() override;
   uint64_t clock_micros() override;
   void clock_delay(uint32_t milliseconds) override;
 
-// serial
+  // serial
   void serial_init(uint32_t baud_rate, uint32_t dev) override;
   void serial_write(const uint8_t *src, size_t len) override;
   uint16_t serial_bytes_available() override;
   uint8_t serial_read() override;
   void serial_flush() override;
 
-// sensors
+  // sensors
   void sensors_init() override;
-  uint16_t num_sensor_errors() ;
+  uint16_t num_sensor_errors();
 
   bool new_imu_data() override;
   bool imu_read(float accel[3], float *temperature, float gyro[3], uint64_t *time) override;
@@ -93,26 +93,33 @@ public:
   bool gnss_present() override { return false; }
   void gnss_update() override {}
   GNSSData gnss_read() override;
-  GNSSRaw gnss_raw_read() override;
+  GNSSFull gnss_full_read() override;
   bool gnss_has_new_data() override;
 
+  bool battery_voltage_present() const override;
+  float battery_voltage_read() const override;
+  void battery_voltage_set_multiplier(double multiplier) override;
 
-// RC
+  bool battery_current_present() const override;
+  float battery_current_read() const override;
+  void battery_current_set_multiplier(double multiplier) override;
+
+  // RC
   void rc_init(rc_type_t rc_type) override;
   bool rc_lost() override;
   float rc_read(uint8_t channel) override;
 
-// PWM
+  // PWM
   void pwm_init(uint32_t refresh_rate, uint16_t idle_pwm) override;
   void pwm_disable() override;
   void pwm_write(uint8_t channel, float value) override;
 
-// non-volatile memory
+  // non-volatile memory
   void memory_init() override;
   bool memory_read(void *dest, size_t len) override;
   bool memory_write(const void *src, size_t len) override;
 
-// LEDs
+  // LEDs
   void led0_on() override;
   void led0_off() override;
   void led0_toggle() override;
@@ -121,16 +128,17 @@ public:
   void led1_off() override;
   void led1_toggle() override;
 
-//Backup memory
-  bool has_backup_data() override;
-  BackupData get_backup_data() override;
-
+  // Backup memory
+  void backup_memory_init() override {}
+  bool backup_memory_read(void *dest, size_t len) override;
+  void backup_memory_write(const void *src, size_t len) override;
+  void backup_memory_clear(size_t len) override;
+  void backup_memory_clear(); // Not an override
 
   void set_imu(float *acc, float *gyro, uint64_t time_us);
   void set_rc(uint16_t *values);
   void set_time(uint64_t time_us);
   void set_pwm_lost(bool lost);
-
 };
 
 } // namespace rosflight_firmware

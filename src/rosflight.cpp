@@ -29,12 +29,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interface/param_listener.h"
 #include "rosflight.h"
+
+#include "interface/param_listener.h"
 
 namespace rosflight_firmware
 {
-
 ROSflight::ROSflight(Board& board, CommLinkInterface& comm_link) :
   board_(board),
   comm_manager_(*this, comm_link),
@@ -88,8 +88,13 @@ void ROSflight::init()
 
   // Initialize the command muxer
   command_manager_.init();
-}
 
+  /***************************/
+  /***  Hardfault Recovery ***/
+  /***************************/
+
+  state_manager_.check_backup_memory();
+}
 
 // Main loop
 void ROSflight::run()
@@ -131,4 +136,4 @@ uint32_t ROSflight::get_loop_time_us()
   return loop_time_us;
 }
 
-}
+} // namespace rosflight_firmware

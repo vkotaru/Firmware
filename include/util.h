@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, James Jackson and Daniel Koch, BYU MAGICC Lab
+ * Copyright (c) 2020, James Jackson, Daniel Koch, and Trey Henrichsen, BYU MAGICC Lab
  *
  * All rights reserved.
  *
@@ -29,23 +29,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "breezy_board.h"
-#include "mavlink.h"
+#ifndef ROSFLIGHT_FIRMWARE_UTIL_H
+#define ROSFLIGHT_FIRMWARE_UTIL_H
 
-#include "rosflight.h"
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
 
-int main()
+namespace rosflight_firmware
 {
-  rosflight_firmware::BreezyBoard board;
-  board.init_board();
-  rosflight_firmware::Mavlink mavlink(board);
-  rosflight_firmware::ROSflight firmware(board, mavlink);
+/**
+ * @brief Fletcher 16-bit checksum
+ *
+ * @param src Pointer to data on which to compute the checksum
+ * @param len Number of bytes in the data
+ * @param finalize Whether to finalize the checksum; set to false for intermediate chunks of
+ * non-contiguous data
+ * @param start Value at which to start the checksum, set for subsequent calls on chunks of
+ * non-contiguous data
+ * @return uint16_t Fletcher 16-bit checksum
+ */
+inline uint16_t checksum_fletcher16(const uint8_t *src, size_t len, bool finalize = true, uint16_t start = 0)
+{
+  static constexpr size_t max_block_length = 5800; // guarantee that no overflow will occur (reduce from standard value
+                                                   // to account for values in 'start')
 
-  firmware.init();
+  uint32_t c1 = (start & 0xFF00) >> 8;
+  uint32_t c2 = start & 0x00FF;
 
-  while (true)
+  size_t block_length;
+  for (; len > 0; len -= block_length)
   {
-    firmware.run();
+    block_length = len < max_block_length ? len : max_block_length;
+    for (size_t i = 0; i < block_length; i++)
+    {
+      c1 += *(src++);
+      c2 += c1;
+    }
+
+    c1 %= 255;
+    c2 %= 255;
   }
-  return 0;
+
+  uint16_t checksum = c1 << 8 | c2;
+
+  if (finalize && checksum == 0)
+    checksum = 0xFFFF;
+
+  return checksum;
 }
+
+} // namespace rosflight_firmware
+
+#endif // ROSFLIGHT_FIRMWARE_UTIL_H

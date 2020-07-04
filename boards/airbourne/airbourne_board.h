@@ -32,46 +32,45 @@
 #ifndef ROSFLIGHT_FIRMWARE_AIRBOURNE_BOARD_H
 #define ROSFLIGHT_FIRMWARE_AIRBOURNE_BOARD_H
 
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
-
-#include <revo_f4.h>
-
-#include "vcp.h"
-#include "uart.h"
-#include "i2c.h"
-#include "spi.h"
-#include "mpu6000.h"
-#include "ms5611.h"
 #include "M25P16.h"
+#include "analog_digital_converter.h"
+#include "analog_pin.h"
+#include "backup_sram.h"
+#include "battery_monitor.h"
+#include "board.h"
 #include "hmc5883l.h"
+#include "i2c.h"
+#include "led.h"
+#include "mb1242.h"
+#include "mpu6000.h"
 #include "ms4525.h"
+#include "ms5611.h"
+#include "pwm.h"
 #include "rc_base.h"
 #include "rc_ppm.h"
 #include "rc_sbus.h"
-#include "pwm.h"
-#include "led.h"
 #include "serial.h"
+#include "spi.h"
 #include "system.h"
 #include "uart.h"
-#include "mb1242.h"
-#include "backup_sram.h"
-// #include "ublox.h"
+#include "ublox.h"
+#include "vcp.h"
 
-#include "board.h"
+#include <revo_f4.h>
+
+#include <cstdbool>
+#include <cstddef>
+#include <cstdint>
 
 namespace rosflight_firmware
 {
-
 class AirbourneBoard : public Board
 {
-
 private:
   VCP vcp_;
   UART uart1_;
   UART uart3_;
-  Serial *current_serial_;//A pointer to the serial stream currently in use.
+  Serial *current_serial_; // A pointer to the serial stream currently in use.
   I2C int_i2c_;
   I2C ext_i2c_;
   SPI spi1_;
@@ -88,7 +87,9 @@ private:
   LED led2_;
   LED led1_;
   M25P16 flash_;
-  // UBLOX gnss_;
+  AnalogDigitalConverter battery_adc_;
+  BatteryMonitor battery_monitor_;
+  UBLOX gnss_;
 
   enum SerialDevice : uint32_t
   {
@@ -163,17 +164,25 @@ public:
   bool gnss_present() override;
   void gnss_update() override;
 
-  //GNSS
+  bool battery_voltage_present() const override;
+  float battery_voltage_read() const override;
+  void battery_voltage_set_multiplier(double multiplier) override;
+
+  bool battery_current_present() const override;
+  float battery_current_read() const override;
+  void battery_current_set_multiplier(double multiplier) override;
+
+  // GNSS
   GNSSData gnss_read() override;
   bool gnss_has_new_data() override;
-  GNSSRaw gnss_raw_read() override;
+  GNSSFull gnss_full_read() override;
   // RC
   void rc_init(rc_type_t rc_type) override;
   bool rc_lost() override;
   float rc_read(uint8_t channel) override;
 
   // PWM
-  void pwm_init(uint32_t refresh_rate, uint16_t  idle_pwm) override;
+  void pwm_init(uint32_t refresh_rate, uint16_t idle_pwm) override;
   void pwm_disable() override;
   void pwm_write(uint8_t channel, float value) override;
 
@@ -191,9 +200,11 @@ public:
   void led1_off() override;
   void led1_toggle() override;
 
-  //Backup Data
-  bool has_backup_data() override;
-  rosflight_firmware::BackupData get_backup_data() override;
+  // Backup Data
+  void backup_memory_init() override;
+  bool backup_memory_read(void *dest, size_t len) override;
+  void backup_memory_write(const void *src, size_t len) override;
+  void backup_memory_clear(size_t len) override;
 };
 
 } // namespace rosflight_firmware
