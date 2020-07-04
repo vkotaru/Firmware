@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, James Jackson and Daniel Koch, BYU MAGICC Lab
+ * Copyright (c) 2020, TBD
  *
  * All rights reserved.
  *
@@ -29,24 +29,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// #include "navio_board.h"
-// #include "rosflight.h"
-// #include "mavlink.h"
-#include <stdio.h>
+#include "navio_board.h"
+#include "rosflight.h"
+#include "mavlink.h"
+
+//#pragma GCC diagnostic ignored "-Wmissing-field-initializers" //Because this was unnecessary and annoying
+
+uint32_t error_count_ = 0;//Used for counting resets
+rosflight_firmware::ROSflight *rosflight=nullptr;//Used to access important variables in case of a hard fault
+rosflight_firmware::StateManager::State get_state()//Used in case of a hard fault
+{
+  if (rosflight==nullptr)
+  {
+#pragma GCC diagnostic push //Ignore blank fields in struct
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+    rosflight_firmware::StateManager::State ret = {0};
+#pragma GCC diagnostic pop
+    return ret;
+  }
+  return rosflight->state_manager_.state();
+}
 
 int main()
 {
-  printf("hello from the other wise");
-  // rosflight_firmware::NavioBoard board;
-  // board.init_board();
-  // rosflight_firmware::Mavlink mavlink(board);
-  // rosflight_firmware::ROSflight firmware(board, mavlink);
+  printf("hello from the other side\n");
+  rosflight_firmware::NavioBoard board;
+  rosflight_firmware::Mavlink mavlink(board);
+  rosflight_firmware::ROSflight firmware(board, mavlink);
+  rosflight = &firmware;
+  board.init_board();
+  firmware.init();
 
-  // firmware.init();
-
-  // while (true)
-  // {
-  //   firmware.run();
-  // }
+  printf("initialization complete\n");
+  while (true)
+  {
+    firmware.run();
+  }
   return 0;
 }

@@ -127,10 +127,11 @@ void Estimator::run()
   //
   // Timing Setup
   //
-
+  
   const uint64_t now_us = RF_.sensors_.data().imu_time;
   if (last_time_ == 0)
   {
+    printf(" now_us %d\n", now_us);
     last_time_ = now_us;
     last_acc_update_us_ = now_us;
     last_extatt_update_us_ = now_us;
@@ -139,6 +140,7 @@ void Estimator::run()
   else if (now_us < last_time_)
   {
     // this shouldn't happen
+    printf(" this is happening");
     RF_.state_manager_.set_error(StateManager::ERROR_TIME_GOING_BACKWARDS);
     last_time_ = now_us;
     return;
@@ -225,6 +227,8 @@ void Estimator::run()
 
   // Save off adjust gyro measurements with estimated biases for control
   state_.angular_velocity = gyro_LPF_ - bias_;
+
+  printf("r: %.2f, p: %.2f, y: %.2f, gx: %.2f\t, gy: %.2f\t, gz: %.2f\n", state_.roll*180/3.14, state_.pitch*180/3.14, state_.yaw*180/3/14, state_.angular_velocity.x, state_.angular_velocity.y, state_.angular_velocity.z);
 
   // If it has been more than 0.5 seconds since the accel update ran and we
   // are supposed to be getting them then trigger an unhealthy estimator error.
